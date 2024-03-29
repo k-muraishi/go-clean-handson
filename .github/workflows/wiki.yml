@@ -8,13 +8,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+     - uses: actions/checkout@v2
+        with:
+          repository: ${{ github.event.repository.full_name }}.wiki
+          ref: ${{ github.event.pages[0].sha }}
+          fetch-depth: 2
       - name: Slack
         run: |
+          url=${HTML_URL}/_compare/$(git rev-parse HEAD^)...$(git rev-parse HEAD)
           curl -X POST -H 'Content-type: application/json' \
-            --data "{\"text\": \"Wiki ${ACTION}: ${TITLE}\n${URL}\"}" \
+            --data "{\"text\": \"Wiki ${ACTION}: ${TITLE}\n${url}\"}" \
             ${WEBHOOK_URL}
         env:
           ACTION: ${{ github.event.pages[0].action }}
           TITLE: ${{ github.event.pages[0].title }}
-          URL: ${{ github.event.pages[0].html_url }}
+          HTML_URL: ${{ github.event.pages[0].html_url }}
           WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
