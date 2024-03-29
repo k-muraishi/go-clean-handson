@@ -4,7 +4,7 @@ on:
     # Wikiの変更を検出
 jobs:
   notify-slack:
-    runs-on: [ubuntu-lastest]
+    runs-on: ubuntu-lastest
     steps:
       - uses: actions/checkout@v3
         with:
