@@ -9,17 +9,17 @@ jobs:
 
     steps:
      - uses: actions/checkout@v2
-        with:
+       with:
           repository: ${{ github.event.repository.full_name }}.wiki
           ref: ${{ github.event.pages[0].sha }}
           fetch-depth: 2
-      - name: Slack
-        run: |
+     - name: Slack
+       run: |
           url=${HTML_URL}/_compare/$(git rev-parse HEAD^)...$(git rev-parse HEAD)
           curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\": \"Wiki ${ACTION}: ${TITLE}\n${url}\"}" \
             ${WEBHOOK_URL}
-        env:
+       env:
           ACTION: ${{ github.event.pages[0].action }}
           TITLE: ${{ github.event.pages[0].title }}
           HTML_URL: ${{ github.event.pages[0].html_url }}
