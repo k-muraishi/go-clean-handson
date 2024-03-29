@@ -1,0 +1,46 @@
+name: wiki
+on:
+  gollum:
+    # Wikiの変更を検出
+jobs:
+  notify-slack:
+    runs-on: [self-hosted]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.repository.full_name }}.wiki
+          ref: ${{ github.event.pages[0].sha }}
+          fetch-depth: 2
+      - name: Slack通知
+        env:
+          ACTION: ${{ github.event.pages[0].action }}
+          TITLE: ${{ github.event.pages[0].title }}
+          HTML_URL: ${{ github.event.pages[0].html_url }}
+          WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          url=${HTML_URL}/_compare/$(git rev-parse HEAD^)...$(git rev-parse HEAD)
+          curl -X POST ${WEBHOOK_URL} \
+            -H 'Content-type: application/json' \
+            -d "{
+              \"blocks\": [
+                {
+                  \"type\": \"section\",
+                  \"text\": {
+                    \"type\": \"mrkdwn\",
+                    \"text\": \"Wiki ${ACTION}: ${TITLE}\"
+                  },
+                  \"accessory\": {
+                    \"type\": \"button\",
+                    \"text\": {
+                      \"type\": \"plain_text\",
+                      \"text\": \"詳細を見る\",
+                      \"emoji\": true
+                    },
+                    \"value\": \"click_me_123\",
+                    \"url\": \"${url}\",
+                    \"action_id\": \"button-action\"
+                  }
+                }
+              ]
+            }"
+        # Slack通知のbody設定は独自にカスタマイズできます
